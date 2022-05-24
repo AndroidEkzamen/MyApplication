@@ -36,8 +36,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 //основной фрагмент, который используется в main activity
 public class FragmentList extends Fragment {
@@ -110,18 +115,67 @@ public class FragmentList extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), ActivityOtchet.class);
+                /* Вариант 1
                 //Создаем новый список объектов, которые подходят под условия фильтра
                 ArrayList<MyObject> search = new ArrayList<MyObject>();
                 for (int i = 0; i < myObjects.size(); i++) {
                     //условие поиска - поле "номер" >=100
                     if (myObjects.get(i).getObjectName().equals("name")) {
+                        // условие поиска - имя объекта содержит/равно (1)
                     // if (myObjects.get(i).getObjectName().contains("1")) {
+                        //условие поиска - числовое занчение объекта > 100
                     //if (myObjects.get(i).getObjectNumber() >= 100) {
                         search.add(myObjects.get(i));
                     }
                 }
                 //передаем созданный список на ActivityOtchet
                 intent.putExtra("MyClass", search);
+                startActivity(intent);
+                */
+
+                // Вариант 2
+                // условие поиска - у пользователя в информации у нас есть + или -, выводим количество пользователей с + и с -
+               /* List<String> otchet = new ArrayList<>();
+                int pluscount = 0;
+                int minuscount = 0;
+                for (int i = 0; i < myObjects.size(); i++) {
+                        if(myObjects.get(i).getObjectInfo().equals("+")){
+                            pluscount ++;
+                        }
+                        if(myObjects.get(i).getObjectInfo().equals("-")){
+                            minuscount ++;
+                        }
+                }
+                otchet.add("Количество пользователей с + : "+ pluscount);
+                otchet.add("Количество пользователей с - : "+ minuscount);
+
+                //передаем созданный список на ActivityOtchet
+                intent.putExtra("MyClass", (Serializable) otchet);
+                startActivity(intent);*/
+
+                // Вариант 3
+               // посчиать сколько раз встречается имя пользователя
+                List<String> otchet = new ArrayList<>();
+                Map<String, Integer> hashMap = new HashMap<>();
+                hashMap.put(myObjects.get(0).getObjectName(), 1);
+                for (int i = 1; i < myObjects.size(); i++) {
+                   if(hashMap.containsKey(myObjects.get(i).getObjectName()))
+                   {
+                       int value = hashMap.get(myObjects.get(i).getObjectName());
+                       hashMap.put(myObjects.get(i).getObjectName(), value+1);
+                   }
+                   else {
+                       hashMap.put(myObjects.get(i).getObjectName(), 1);
+                   }
+                }
+                // Получаем набор элементов
+                Set<Map.Entry<String, Integer>> set = hashMap.entrySet();
+                // Отобразим набор
+                for (Map.Entry<String, Integer> me : set) {
+                    otchet.add(me.getKey() + ": "+ me.getValue());
+                }
+                //передаем созданный список на ActivityOtchet
+                intent.putExtra("MyClass", (Serializable) otchet);
                 startActivity(intent);
             }
         });
@@ -135,7 +189,7 @@ public class FragmentList extends Fragment {
                 String LOG_TAG = "myLogs";
                 Gson gson = new Gson();
                 String jsonString = gson.toJson(myObjects);
-                //запись файла во внутреннюю память
+                //запись файла во внутреннюю память 75 урок на старт андроид
                 try {
                     // отрываем поток для записи
                     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
